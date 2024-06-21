@@ -2,4 +2,7 @@
 {% block title %}Hello!{% endblock %}
 {% block content %}
 <p class="text-black tracking-tight text-4xl">This is a test of the font</p>
+<a href="/another-page"
+	class="text-indigo-800 text-2xl hover:text-red-500 transition-colors text-bold text-underline">Another page</a>
+<button hx-get="/api/hello" hx-swap="innerHtml">Click it</button>
 {% endblock %}

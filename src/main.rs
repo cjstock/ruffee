@@ -18,10 +18,17 @@ async fn main() -> anyhow::Result<()> {
 
     info!("initializing router");
     let assets_path = std::env::current_dir().unwrap();
-    let router = Router::new().route("/", get(hello)).nest_service(
-        "/assets",
-        ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
-    );
+
+    let api_router = Router::new().route("/hello", get(say_hello));
+
+    let router = Router::new()
+        .nest("/api", api_router)
+        .route("/", get(hello))
+        .route("/another-page", get(another_page))
+        .nest_service(
+            "/assets",
+            ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
+        );
     let port = 8000_u16;
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
     let tcplistener = TcpListener::bind(addr).await?;
@@ -35,6 +42,10 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+async fn say_hello() -> &'static str {
+    "Yoooooo"
+}
+
 #[derive(Template)]
 #[template(path = "hello.html")]
 struct HelloTemplate<'a> {
@@ -43,4 +54,16 @@ struct HelloTemplate<'a> {
 
 async fn hello() -> HelloTemplate<'static> {
     HelloTemplate { name: "world" }
+}
+
+#[derive(Template)]
+#[template(path = "another-page.html")]
+struct AnotherPageTemplate<'a> {
+    name: &'a str,
+}
+
+async fn another_page() -> AnotherPageTemplate<'static> {
+    AnotherPageTemplate {
+        name: "another one",
+    }
 }
