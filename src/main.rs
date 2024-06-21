@@ -1,6 +1,9 @@
+use std::env;
+
 use anyhow::Context;
 use askama_axum::Template;
 use axum::{routing::get, Router};
+use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
 use tracing::info;
@@ -15,6 +18,18 @@ async fn main() -> anyhow::Result<()> {
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    let db_conn = env::var("DB_URL").unwrap();
+
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_conn)
+        .await?;
+    let row: (i64,) = sqlx::query_as("SELECT $1")
+        .bind(150_i64)
+        .fetch_one(&pool)
+        .await?;
+    dbg!(&row);
 
     info!("initializing router");
     let assets_path = std::env::current_dir().unwrap();
