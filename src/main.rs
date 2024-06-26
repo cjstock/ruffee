@@ -1,9 +1,10 @@
-use std::env;
+use std::sync::Arc;
 
 use anyhow::Context;
 use askama_axum::Template;
-use axum::{routing::get, Router};
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use axum::{extract::State, routing::get, Json, Router};
+use serde::{Deserialize, Serialize};
+use sqlx::{postgres::PgPoolOptions, query, query_as, PgPool};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
 use tracing::info;
@@ -19,31 +20,29 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let db_conn = env::var("DB_URL").unwrap();
+    let db_conn = dotenv::var("DATABASE_URL")?;
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&db_conn)
         .await?;
-    let row: (i64,) = sqlx::query_as("SELECT $1")
-        .bind(150_i64)
-        .fetch_one(&pool)
-        .await?;
-    dbg!(&row);
+
+    sqlx::migrate!().run(&pool).await?;
+
+    let app_state = AppState { db: pool };
 
     info!("initializing router");
     let assets_path = std::env::current_dir().unwrap();
 
-    let api_router = Router::new().route("/hello", get(say_hello));
+    let api_router = Router::new().route("/coffee", get(get_coffees));
 
     let router = Router::new()
         .nest("/api", api_router)
-        .route("/", get(hello))
-        .route("/another-page", get(another_page))
         .nest_service(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
-        );
+        )
+        .with_state(app_state);
     let port = 8000_u16;
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
     let tcplistener = TcpListener::bind(addr).await?;
@@ -57,12 +56,31 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn say_hello() -> &'static str {
-    "Yoooooo"
+#[derive(Clone)]
+struct AppState {
+    db: PgPool,
+}
+
+#[derive(Deserialize, Serialize)]
+struct Coffee {
+    title: String,
+    description: String,
+    altitude: i64,
+}
+
+#[derive(Deserialize, Serialize)]
+struct MultipleCoffee {
+    coffees: Vec<Coffee>,
+    coffees_count: usize,
+}
+
+async fn get_coffees(State(state): State<AppState>) -> anyhow::Result<Json<Vec<Coffee>>> {
+    let coffees = query!("select * from coffee").fetch_all(state.db).await?;
+    Ok()
 }
 
 #[derive(Template)]
-#[template(path = "hello.html")]
+#[template(path = "coffees.html")]
 struct HelloTemplate<'a> {
     name: &'a str,
 }
