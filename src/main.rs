@@ -1,10 +1,9 @@
-use std::sync::Arc;
-
 use anyhow::Context;
 use askama_axum::Template;
-use axum::{extract::State, routing::get, Json, Router};
-use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgPoolOptions, query, query_as, PgPool};
+use axum::Router;
+use ruffee::app::router::app_router;
+use ruffee::{api::router::api_router, AppState};
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
 use tracing::info;
@@ -34,15 +33,13 @@ async fn main() -> anyhow::Result<()> {
     info!("initializing router");
     let assets_path = std::env::current_dir().unwrap();
 
-    let api_router = Router::new().route("/coffee", get(get_coffees));
-
     let router = Router::new()
-        .nest("/api", api_router)
+        .nest("/api", api_router(app_state.clone()))
+        .nest("/app", app_router(app_state.clone()))
         .nest_service(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
-        )
-        .with_state(app_state);
+        );
     let port = 8000_u16;
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
     let tcplistener = TcpListener::bind(addr).await?;
@@ -54,49 +51,4 @@ async fn main() -> anyhow::Result<()> {
         .context("error starting server")?;
 
     Ok(())
-}
-
-#[derive(Clone)]
-struct AppState {
-    db: PgPool,
-}
-
-#[derive(Deserialize, Serialize)]
-struct Coffee {
-    title: String,
-    description: String,
-    altitude: i64,
-}
-
-#[derive(Deserialize, Serialize)]
-struct MultipleCoffee {
-    coffees: Vec<Coffee>,
-    coffees_count: usize,
-}
-
-async fn get_coffees(State(state): State<AppState>) -> anyhow::Result<Json<Vec<Coffee>>> {
-    let coffees = query!("select * from coffee").fetch_all(state.db).await?;
-    Ok()
-}
-
-#[derive(Template)]
-#[template(path = "coffees.html")]
-struct HelloTemplate<'a> {
-    name: &'a str,
-}
-
-async fn hello() -> HelloTemplate<'static> {
-    HelloTemplate { name: "world" }
-}
-
-#[derive(Template)]
-#[template(path = "another-page.html")]
-struct AnotherPageTemplate<'a> {
-    name: &'a str,
-}
-
-async fn another_page() -> AnotherPageTemplate<'static> {
-    AnotherPageTemplate {
-        name: "another one",
-    }
 }

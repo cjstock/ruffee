@@ -1,6 +1,12 @@
 {% extends "shell.html" %}
 {% block title %}Hello!{% endblock %}
 {% block content %}
-<p class="text-black tracking-tight text-4xl">This is a test of the font</p>
-<button hx-get="/api/hello" hx-swap="innerHtml">Click it</button>
+<ul>
+{% for coffee in coffees %}
+	<li class="bg-red-500">Title: {{coffee.title}}</li>
+	{% if let Some(description) = coffee.description %}
+	<li>Desc: {{description}}</li>
+	{% endif %}
+{% endfor %}
+</ul>
 {% endblock %}
