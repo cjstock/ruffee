@@ -1,0 +1,57 @@
+<script>
+function toggle(id){
+  var el = document.getElementById(`options-menu-${id}`);
+  el.classList.toggle("hidden");
+}
+</script>
+<li class="overflow-hidden rounded-xl border border-gray-200">
+  <div class="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 p-6">
+    <div class="h-12 w-12 grid place-items-center flex-none rounded-lg bg-white object-cover ring-1 ring-gray-900/10">
+      <i class="fa-solid fa-coffee-bean fa-xl"></i>
+    </div>
+    <div class="flex flex-col justify-between">
+    <div class="text-sm font-medium truncate leading-6 text-gray-900">{{coffee.title}}</div>
+      {% if let Some(region) = coffee.region %}
+      <div class="text-xs font-medium truncate leading-3 text-gray-700">{{region}}</div>
+      {% endif %}
+    </div>
+    <div class="relative ml-auto">
+      <button type="button" hx-on:click="toggle('{{coffee.coffee_id}}');" class="-m-2.5 block p-2.5 text-gray-400 hover:text-gray-500" id="options-menu-0-button" aria-expanded="false" aria-haspopup="true">
+        <span class="sr-only">Open options</span>
+        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M3 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM8.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM15.5 8.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
+        </svg>
+      </button>
+
+      <!--
+        Dropdown menu, show/hide based on menu state.
+
+        Entering: "transition ease-out duration-100"
+          From: "transform opacity-0 scale-95"
+          To: "transform opacity-100 scale-100"
+        Leaving: "transition ease-in duration-75"
+          From: "transform opacity-100 scale-100"
+          To: "transform opacity-0 scale-95"
+      -->
+      <div id="options-menu-{{coffee.coffee_id}}" class="hidden absolute right-0 z-10 mt-0.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="options-menu-0-button" tabindex="-1">
+        <!-- Active: "bg-gray-50", Not Active: "" -->
+        <a href="#" class="block px-3 py-1 text-sm leading-6 text-gray-900" role="menuitem" tabindex="-1" id="options-menu-0-item-0">Edit<span class="sr-only">, Tuple</span></a>
+        <a href="#" class="block px-3 py-1 text-sm leading-6 text-gray-900" role="menuitem" tabindex="-1" id="options-menu-0-item-1">Delete<span class="sr-only">, Tuple</span></a>
+      </div>
+    </div>
+  </div>
+  <dl class="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm leading-6">
+    {% if let Some(roast) = coffee.roast_level %}
+    <div class="flex justify-between gap-x-4 py-3">
+      <dt class="text-gray-500">Roast</dt>
+      <dd class="text-gray-700">{{roast}}</dd>
+    </div>
+    {% endif %}
+    {% if let Some(process) = coffee.process %}
+    <div class="flex justify-between gap-x-4 py-3">
+      <dt class="text-gray-500">Process</dt>
+      <dd class="text-gray-700">{{process}}</dd>
+    </div>
+    {% endif %}
+  </dl>
+</li>
