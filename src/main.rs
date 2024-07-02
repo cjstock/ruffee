@@ -1,11 +1,10 @@
 use anyhow::Context;
-use askama_axum::Template;
 use axum::Router;
 use ruffee::app::router::app_router;
 use ruffee::{api::router::api_router, AppState};
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
-use tower_http::services::ServeDir;
+use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -14,7 +13,7 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "ruffee".into()),
+                .unwrap_or_else(|_| "ruffee=debug,tower_http=debug,axum::rejection=trace".into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -39,7 +38,8 @@ async fn main() -> anyhow::Result<()> {
         .nest_service(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
-        );
+        )
+        .layer(TraceLayer::new_for_http());
     let port = 8000_u16;
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
     let tcplistener = TcpListener::bind(addr).await?;
