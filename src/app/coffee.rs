@@ -92,8 +92,12 @@ async fn add_coffee(
 
 #[derive(Template)]
 #[template(path = "add_coffee.html")]
-struct PageAddCoffee {}
+struct PageAddCoffee {
+    text_color: String,
+}
 
 async fn page_add_coffee() -> Result<PageAddCoffee> {
-    Ok(PageAddCoffee {})
+    Ok(PageAddCoffee {
+        text_color: "red".to_string(),
+    })
 }
