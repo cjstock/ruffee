@@ -34,7 +34,7 @@ async fn main() -> anyhow::Result<()> {
 
     let router = Router::new()
         .nest("/api", api_router(app_state.clone()))
-        .nest("/app", app_router(app_state.clone()))
+        .nest("/", app_router(app_state.clone()))
         .nest_service(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),

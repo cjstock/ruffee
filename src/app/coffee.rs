@@ -76,8 +76,8 @@ struct AddCoffee {
 async fn add_coffee(
     State(app_state): State<AppState>,
     Form(coffee): Form<AddCoffee>,
-) -> Result<()> {
-    tracing::debug!("adding coffee");
+) -> Result<CoffeesTemplate> {
+    tracing::info!("adding coffee");
     let result = sqlx::query!(r#"
         insert into coffee
         (title, altitude, description, country, region, farm, farmer, variety, process, grade, roast_level, tasting_notes, recommended_brew_methods) values
@@ -87,17 +87,13 @@ async fn add_coffee(
     if let Err(err) = result {
         tracing::trace!("{:?}", err);
     }
-    Ok(())
+    get_coffees(axum::extract::State(app_state)).await
 }
 
 #[derive(Template)]
 #[template(path = "add_coffee.html")]
-struct PageAddCoffee {
-    text_color: String,
-}
+struct PageAddCoffee {}
 
 async fn page_add_coffee() -> Result<PageAddCoffee> {
-    Ok(PageAddCoffee {
-        text_color: "red".to_string(),
-    })
+    Ok(PageAddCoffee {})
 }
