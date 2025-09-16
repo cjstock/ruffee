@@ -1,0 +1,13 @@
+version: '1.0'
+name: db-dev
+services:
+  postgres:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=ruffee
+      - POSTGRES_USER=corey
+      - POSTGRES_DB=db_dev

@@ -1,7 +1,7 @@
+use axum::Json;
 use axum::http::header::WWW_AUTHENTICATE;
 use axum::http::{HeaderMap, HeaderValue, Response, StatusCode};
 use axum::response::IntoResponse;
-use axum::Json;
 use sqlx::error::DatabaseError;
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -75,6 +75,9 @@ pub enum Error {
     /// for security reasons.
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
+
+    #[error("an internal server error occurred")]
+    Render(#[from] askama::Error),
 }
 
 impl Error {
@@ -106,7 +109,7 @@ impl Error {
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::Sqlx(_) | Self::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Sqlx(_) | Self::Anyhow(_) | Self::Render(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

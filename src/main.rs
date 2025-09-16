@@ -1,7 +1,7 @@
 use anyhow::Context;
 use axum::Router;
 use ruffee::app::router::app_router;
-use ruffee::{api::router::api_router, AppState};
+use ruffee::{AppState, api::router::api_router};
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
@@ -34,7 +34,7 @@ async fn main() -> anyhow::Result<()> {
 
     let router = Router::new()
         .nest("/api", api_router(app_state.clone()))
-        .nest("/", app_router(app_state.clone()))
+        .merge(app_router(app_state.clone()))
         .nest_service(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),

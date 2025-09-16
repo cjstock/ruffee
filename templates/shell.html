@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="en" class="h-full bg-dark-purple">
+<html lang="en" class="h-full dark:bg-dark-purple bg-cinnabar">
 
 <head>
 	<link href="/assets/main.css" rel="stylesheet" />
 	<link href="/assets/fontawesome/css/fontawesome.css" rel="stylesheet" />
 	<link href="/assets/fontawesome/css/solid.css" rel="stylesheet" />
-	<script src="https://unpkg.com/htmx.org@2.0.0"
-		integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw"
-		crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.7/dist/htmx.js"
+        integrity="sha384-yWakaGAFicqusuwOYEmoRjLNOC+6OFsdmwC2lbGQaRELtuVEqNzt11c2J711DeCZ"
+        crossorigin="anonymous"></script>
 	<title>{% block title %}{{ title }}{% endblock %}</title>
 	{% block head %}{% endblock %}
 </head>

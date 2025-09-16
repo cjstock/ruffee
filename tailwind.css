@@ -1,0 +1,21 @@
+@import "tailwindcss" source("./templates");
+
+@plugin "@tailwindcss/forms";
+
+@font-face {
+    font-family: MonaspaceKrypton;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/MonaspaceKrypton-Regular.woff2") format("woff2");
+}
+
+@theme {
+    --color-dark-purple: #1F0A1E;
+    --color-cinnabar: #D1603D;
+    --color-powder-blue: #98C1D9;
+    --color-state-blue: #6969B3;
+    --color-sunset: #FFCB77;
+    --default-font-family: "MonaspaceKrypton", sans-serif;
+}
+

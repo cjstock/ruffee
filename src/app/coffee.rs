@@ -1,9 +1,9 @@
 use askama::Template;
 use axum::{
-    debug_handler,
+    Form, Router, debug_handler,
     extract::State,
+    response::{Html, IntoResponse},
     routing::{get, post},
-    Form, Router,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -42,11 +42,11 @@ struct CoffeesTemplate {
     coffees: Vec<Coffee>,
 }
 
-async fn get_coffees(State(app_state): State<AppState>) -> Result<CoffeesTemplate> {
+async fn get_coffees(State(app_state): State<AppState>) -> Result<impl IntoResponse> {
     let coffees = sqlx::query_as::<_, Coffee>("select * from coffee")
         .fetch_all(&app_state.db)
         .await?;
-    Ok(CoffeesTemplate { coffees })
+    Ok(Html(CoffeesTemplate { coffees }.render()?))
 }
 
 #[derive(Template)]
@@ -76,7 +76,7 @@ struct AddCoffee {
 async fn add_coffee(
     State(app_state): State<AppState>,
     Form(coffee): Form<AddCoffee>,
-) -> Result<CoffeesTemplate> {
+) -> Result<impl IntoResponse> {
     tracing::info!("adding coffee");
     let result = sqlx::query!(r#"
         insert into coffee
@@ -94,6 +94,6 @@ async fn add_coffee(
 #[template(path = "add_coffee.html")]
 struct PageAddCoffee {}
 
-async fn page_add_coffee() -> Result<PageAddCoffee> {
-    Ok(PageAddCoffee {})
+async fn page_add_coffee() -> Result<impl IntoResponse> {
+    Ok(Html(PageAddCoffee {}.render()?))
 }
