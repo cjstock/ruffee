@@ -1,13 +1,7 @@
-pub mod api;
-pub mod app;
-mod error;
+use sqlx::PgPool;
 
-#[derive(Clone)]
+pub mod coffee_bean;
+
 pub struct AppState {
     pub db: PgPool,
 }
-
-pub use error::Error;
-use sqlx::PgPool;
-
-pub type Result<T, E = Error> = std::result::Result<T, E>;
