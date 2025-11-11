@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.86"
 tokio = { version = "1.38.0", features = ["full"] }
-sqlx = { version = "0.8.6", features = ["runtime-tokio", "tls-native-tls", "postgres", "uuid", "migrate", "time"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio", "tls-native-tls", "postgres", "uuid", "migrate", "chrono"] }
 dotenv = "0.15.0"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
@@ -15,3 +15,4 @@ uuid = { version = "1.9.1", features = ["serde"] }
 ratatui = { version = "0.29.0", features = ["all-widgets", "document-features", "macros", "palette", "scrolling-regions", "serde"] }
 crossterm = { version = "0.29.0", features = ["serde"] }
 color-eyre = "0.6.5"
+chrono = { version = "0.4", features = ["serde"] }
